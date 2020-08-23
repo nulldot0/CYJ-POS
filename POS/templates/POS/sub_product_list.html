@@ -1,0 +1,26 @@
+
+
+{% for sub_product in sub_products %}
+<div class="card my-1" data-prod-id="{{sub_product.id}}">
+   	<div class="card-header">
+   	  <div class="d-flex justify-content-center align-items-center">
+   		<div class="w-50">
+	   		<h5 class="m-0">{{sub_product.description}} @ {{sub_product.unit_price}}</h5>
+	   	</div>
+	    <div class="input-group d-flex justify-content-center align-items-center w-50">
+		  <div class="input-group-prepend">
+		    <button class="btn btn-danger" data-action="minus">-</button>
+		  </div>
+		  <input type="number" class="form-control text-center" value="0">
+		  <div class="input-group-append">
+		    <button class="btn btn-success" data-action="add">+</button>
+		  </div>
+		</div>
+	   	</div>
+   	</div>
+</div>
+{% empty %}
+<div class="d-flex justify-content-center align-items-center" style="height: 100%">
+	<h5>No subproducts found!</h5>
+</div>
+{% endfor %}

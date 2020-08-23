@@ -1,0 +1,32 @@
+{% extends 'POS/index.html' %}
+{% load static %}
+{% block content %}
+<h4>Welcome {{request.user.first_name}}!</h4>
+
+<div class="d-flex flex-column py-4 mt-4">
+<a href="/" class="btn btn-primary align-self-end my-2 text-white">New Order</a>
+<h4>Transactions</h4>
+<div class="jumbotron my-2" style="height: 350px; overflow-y: auto">
+  {% for invoice in invoices reversed %}
+  <div class="card my-2">
+  	<div class="card-header"><a href="/?invoice-id={{invoice.pk}}">Invoice No. {{invoice.id}}</a></div>
+  	<div class="card-body">
+  		<p class="card-text m-0">Customer: {{invoice.customer}}</p>
+  		<p class="card-text">Created on: {{invoice.date_created|date:'P m-d-y'}}</p>
+      <p class="card-text">Status: <span class="{% if invoice.status == 'processing'%}badge-warning{% endif %} p-2 text-white rounded">{{invoice.status|title}}</span></p>
+  	</div>
+  </div>
+  {% empty %}
+  <h4 class="align-self-center text-center">No transactions</h4>
+  {% endfor %}
+</div>
+</div>
+
+{% endblock %}
+
+{% block js %}
+	<script type="text/javascript" src="{% static 'POS/js/handler.js' %}"></script>
+{% endblock %}
+
+{% block bottom_btn %}
+{% endblock %}

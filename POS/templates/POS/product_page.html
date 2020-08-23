@@ -1,0 +1,47 @@
+{% extends 'POS/index.html' %}
+{% load static %}
+
+{% block content %}
+<h3 class="mb-2 text-center">Products</h3>
+<div class="d-flex justify-content-end py-3">
+	<button class="btn btn-outline-primary" data-toggle="modal" data-target="#newCategoryModal">
+		<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-bricks" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+		  <path fill-rule="evenodd" d="M15 13H1v2h14v-2zM1 12a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H1zm14-5H1v2h14V7zM1 6a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H1z"/>
+		  <path fill-rule="evenodd" d="M13 10H3v2h10v-2zM3 9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3zm10-5H3v2h10V4zM3 3a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H3z"/>
+		  <path fill-rule="evenodd" d="M15 1H1v2h14V1zM1 0a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V1a1 1 0 0 0-1-1H1z"/>
+		  <path fill-rule="evenodd" d="M5.5 1v2h-1V1h1zm6 0v2h-1V1h1zm-4 5V4h1v2h-1zm-2 1v2h-1V7h1zm6 0v2h-1V7h1zm-4 5v-2h1v2h-1zm-3 3v-2h1v2h-1zm6 0v-2h1v2h-1z"/>
+		</svg>
+		<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-plus" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+		  <path fill-rule="evenodd" d="M8 3.5a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5H4a.5.5 0 0 1 0-1h3.5V4a.5.5 0 0 1 .5-.5z"/>
+		  <path fill-rule="evenodd" d="M7.5 8a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H8.5V12a.5.5 0 0 1-1 0V8z"/>
+		</svg>
+	</button>
+	<button class="btn btn-outline-primary ml-2" data-toggle="modal" data-target="#newProductModal" >
+		<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-box-seam" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+		  <path fill-rule="evenodd" d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2l-2.218-.887zm3.564 1.426L5.596 5 8 5.961 14.154 3.5l-2.404-.961zm3.25 1.7l-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923l6.5 2.6zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464L7.443.184z"/>
+		</svg>
+		<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-plus" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+		  <path fill-rule="evenodd" d="M8 3.5a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5H4a.5.5 0 0 1 0-1h3.5V4a.5.5 0 0 1 .5-.5z"/>
+		  <path fill-rule="evenodd" d="M7.5 8a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H8.5V12a.5.5 0 0 1-1 0V8z"/>
+		</svg>
+	</button>
+</div>
+
+<input type="text" name="search" class="form-control" placeholder="Search Product" id="searchProduct">
+
+<div class="jumbotron my-4" id="productListContainer" style="height: 400px; overflow-y: auto">
+	
+</div>
+
+{% endblock %}
+
+{% block modal %}
+	{% include 'POS/product_page_modal.html' %}
+{% endblock %}
+{% block js %}
+	<script type="text/javascript" src="{% static 'POS/js/product_page.js' %}"></script>
+{% endblock %}
+
+{% block bottom_btn %}
+{% endblock %}
+
