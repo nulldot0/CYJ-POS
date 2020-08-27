@@ -19,18 +19,17 @@
 	
 	<main class="container py-4">
 		{% block content %}
-		
-
+			
 		{% endblock %}
 	</main>
 	{% block bottom_btn %}
-	{% include 'POS/bottom_btn_group.html' %}
+		{% include 'POS/bottom_btn_group.html' %}
 	{% endblock %}
 	<!-- modals -->
 	{% block modal%}
-	{% include 'POS/new_customer_modal.html' %}
-	{% include 'POS/customer_selection_modal.html' %}
-	{% include 'POS/sub_product_modal.html' %}
+		{% include 'POS/new_customer_modal.html' %}
+		{% include 'POS/customer_selection_modal.html' %}
+		{% include 'POS/sub_product_modal.html' %}
 	{% endblock %}
 	<div class="d-none spinner-border" role="status">
 	  <span class="sr-only">Loading...</span>

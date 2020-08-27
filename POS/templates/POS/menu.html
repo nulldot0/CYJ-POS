@@ -2,8 +2,8 @@
 
 <div class="h-100 w-75 d-flex justify-content-start align-items-center fixed-top" id="sideNav" style="z-index: 1031; margin-left: -75%">
 	<div class="w-100 h-100 bg-white nav flex-column p-2 shadow-lg" id="settingMenu">
-		<a href="/handler" class="nav-link btn btn-primary my-1">Home</a>
-		<a href="/" class="nav-link btn btn-primary my-1">New Order</a>
+		<a href="{% url 'handler-page' %}" class="nav-link btn btn-primary my-1">Home</a>
+		<a href="{% url 'index' %}" class="nav-link btn btn-primary my-1">New Order</a>
 		<a href="{% url 'product-page'%}" class="nav-link btn btn-primary my-1">Products</a>
 	</div>
 	<img style="height: 5em; width: 2em; border-radius: 0 200px 200px 0; margin-right: -2em;" class="btn btn-primary shadow-lg p-1" src="{% static 'POS/icons/arrow-right-short.svg'%}" id="menu-btn">

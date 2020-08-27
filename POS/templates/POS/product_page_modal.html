@@ -1,8 +1,9 @@
-<div class="modal" id="newProductModal" tabindex="-1" role="dialog" aria-hidden="true">
+<!-- Edit a product or Add a new product modal -->
+<div class="modal" id="ProductModal" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Create New Product</h5>
+        <h5 class="modal-title" id="exampleModalLabel">Product Modal</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -28,6 +29,7 @@
   </div>
 </div>
 
+<!-- Adds a new category modal -->
 <div class="modal" id="newCategoryModal" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
@@ -42,6 +44,39 @@
           <label for="formGroupExampleInput">Category Name</label>
           <input type="text" class="form-control" id="categoryName" placeholder="Category Name">
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="save">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Adds a new Sub Product -->
+<div class="modal" id="newSubProductModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">{{product.name | title}}: create sub-product</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea class="form-control" id="description" placeholder="Description"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="description">Unit Price</label>
+          <input type="Number "class="form-control" id="unit-price" placeholder="Unit Price">
+        </div>
+        <div class="form-group">
+          <label for="description">Unit Cost</label>
+          <input type="Number "class="form-control" id="unit-cost" placeholder="Unit Cost">
+        </div>
+        <!-- TODO: ADD option for stock -->
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

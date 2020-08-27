@@ -1,0 +1,10 @@
+{% load humanize %}
+{% for item in items reversed %}
+<div class="card my-1">
+   	<div class="card-header">
+   		<p class="m-0"><span class="font-weight-bold">{{item.product.product_family.name}}</span> {{item.product.description}}</p>
+   		<p class="m-0">₱{{item.product.unit_price | intcomma}} &times; {{item.no_of_units | intcomma}} unit/s</p>
+   		<p class="m-0">Total: ₱{{item.total_price | intcomma}}</p>
+   	</div>
+</div>
+{% endfor %}

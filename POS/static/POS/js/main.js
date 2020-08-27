@@ -5,17 +5,33 @@ $(document).ready(function() {
 		if ($($(this).parent()).css('margin-left') == '0px') {
 			$($(this).parent()).animate({
 				'margin-left': '-75%'
-			}, function() {
+			}, 150, function() {
 				btn.attr('src', '/static/POS/icons/arrow-right-short.svg')
 			})
 
 		} else {
 			$($(this).parent()).animate({
 				'margin-left': '0%'
-			}, function() {
+			}, 150, function() {
 				btn.attr('src', '/static/POS/icons/arrow-left-short.svg')
 			})
 
 		}
 	})
 })
+
+
+let formatNum = (num) => {
+	num = String(num).split('').reverse()
+	let ret_num = []
+	for (i=0; i < num.length; i++) {
+		if (i % 3 == 0 && i != 0) {
+			ret_num.push(',')
+		}
+
+		ret_num.push(num[i])
+	}
+
+	return (ret_num.reverse().join(''))
+}
+

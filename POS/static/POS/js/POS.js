@@ -1,21 +1,16 @@
 $(document).ready(function() {
-	let customerIdInp = $('input[name="customer-id"]')
-	$('#newCustomerModal').click(function(e) {
-		if ($(e.target).attr('id') == 'add' ) {
-			let nameInp = $($(this).find('input[name="name"]'))
-			if (nameInp.val()) {
-				addCustomer(nameInp.val())
-				nameInp.val('')
-				$(this).modal('hide')
-			}
-			
-		}	
+	let customerIdInp = $('input[name="customer-id"]').val()
+	$('#newCustomerModal #add').click(function(e) {
+		if ($('#newCustomerModal input[name="name"]').val()) {
+			addCustomer($('#newCustomerModal input[name="name"]').val())
+		}
+
+		$('#newCustomerModal input[name="name"]').val('')
+		$('#newCustomerModal').modal('hide')
 	})
 
 	// customer selection search
-	$('#selection-customer-search').keyup(function() {
-		search($(this).val(), $('#customer-selection-ul'))
-	})
+
 
 	$('#selectionCustomerModal').click(function(e) {
 		if ($(e.target).hasClass('list-group-item-action')) {
@@ -27,11 +22,26 @@ $(document).ready(function() {
 
 	btnGroupEvent()
 	getCounter()
-	updateSubProductEvent()
 })
 
+
+// Events
 let loader = $('.spinner-border')
 
+let searchEvent = {
+	selectionCustomer: () => {
+			$('#selection-customer-search').keyup(function() {
+				search($(this).val(), $('#customer-selection-ul'))
+			})
+		},
+	product: () => {
+		$('input[name="productSearch"]').keyup(function() {
+			search($(this).val(), $('#products-div'))
+		})
+	}
+}
+
+// gets all products
 let getProducts = (targetDiv=$('#products-div'), category='all') => {
 	loader = loader.clone().removeClass('d-none')
 	targetDiv.empty().append(loader)
@@ -41,11 +51,13 @@ let getProducts = (targetDiv=$('#products-div'), category='all') => {
 	})
 }
 
+// get Favorites
 let getFavorites = (userID, targetDiv=$('#favorites-div')) => {
 	loader = loader.clone().removeClass('d-none')
 	targetDiv.empty().html(loader)
 }
 
+// fetch all customer
 let getCustomers = (targetDiv=$('#selectionCustomerModal .modal-body')) => {
 	$.get('get-customers/').done(function(data) {
 		targetDiv.empty().html(data)
@@ -54,19 +66,24 @@ let getCustomers = (targetDiv=$('#selectionCustomerModal .modal-body')) => {
 
 // Get sub products by their product Id
 let getSubProductById = (prodId) => {
-	let modalBody = $('#subProductsModal .modal-body')
-	modalBody.empty()
+	return new Promise((resolve, reject) => {
+		let modalBody = $('#subProductsModal .modal-body')
+		modalBody.empty()
 
-	$.get(`get-sub-products-by-id/`, {
-		product_id:prodId
-	}).done(function(data) {
-		modalBody.html(data)
-
-		getSubProductUnits()
+		$.get(`get-sub-products-by-id/`, {
+			product_id:prodId
+		}).done(function(data) {
+			modalBody.html(data)
+			resolve()
+		}).fail(function() {
+			reject()
+		})
 	})
+	.then(getSubProductUnits)
+	.then(subProductAddMinus)
 }
 
-// Get the Sub Products no. of units
+// Get the Sub Products no. of units on subProductModal
 let getSubProductUnits = () => {
 	let prodIds = []
 
@@ -88,18 +105,22 @@ let getSubProductUnits = () => {
 	})
 }
 
+// adds customer
 let addCustomer = (name) => {
-	$.post('add-customer/', {
-		name:name,
-		csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val()
+	return new Promise((resolve, reject) => {
+		$.post('add-customer/', {
+			name:name,
+			csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val()
+		})
+		.done(function(data) {
+			resolve()
+			console.log(data)
+		})
 	})
-	.done(function(data) {
-		console.log(data)
-
-		getCustomers()
-	})
+	.then(getCustomers)
 }
 
+// changes the customer
 let changeCustomer = (custId) => {
 	$.post('change-customer/', {
 		invoice_id: $('input[name="invoice-id"]').val(),
@@ -122,41 +143,40 @@ let search = (q, cont) => {
 }
 
 let getCounter = () => {
-	let invId = $('input[name="invoice-id"]').val()
-	$.get(`/counter/${invId}`, function(data) {
-		$('.container').empty().html(data)
-	}).done(function() {
-		getProducts()
-		getFavorites()
-		getCustomers()
-		productCounter()
-		getTotal()
+	return new Promise((resolve, reject) => {
+		let invId = $('input[name="invoice-id"]').val()
+		$.get(`/counter/${invId}`, function(data) {
+			$('.container').empty().html(data)
+		}).done(function() {
+			resolve()
+		})
 	})
-}
 
-
-let getInvoice = () => {
-	let invId = $('input[name="invoice-id"]').val()
-	console.log('test')
+	.then(getProducts)
+	.then(getFavorites)
+	.then(getCustomers)
+	.then(counterEvents)
+	.then(getTotal)
+	.then(searchEvent.selectionCustomer)
+	.then(searchEvent.product)
 }
 
 let getPay = () => {
 
 }
 
-let productCounter = () => {
+
+let counterEvents = () => {
 	// Gets all subproducts
 	$('#main-product-container').click(function(e) {
 		if ($(e.target).data('prod-id')) {
 			let prodId = $(e.target).data('prod-id')
 			let prodName = $(e.target).data('prod-name')
 			$($('#subProductsModal .modal-title')).text(prodName)
-			getSubProductById(prodId=$(e.target).data('prod-id'))
-
+			getSubProductById(prodId)
 			$($('#subProductsModal #save')).off()
 			$($('#subProductsModal #save')).click(function() {
-				subProductSaveBtn()
-
+				subProductSave()
 			})
 		}
 	})
@@ -174,72 +194,88 @@ let btnGroupEvent = () => {
 
 				if ($(e.target).data('btn-path') == 'invoice') {
 					// do something
-					$.get(`/invoice/${invId}`, function(data) {
-						$('.container').empty().html(data)
+					new Promise((resolve, reject) => {
+						$.get(`/invoice/${invId}`, function(data) {
+							$('.container').empty().html(data)
+							resolve()
+						})
 					})
+					.then(getInvoiceItems)
+					.then(getTotal)
 				}
 
 				if ($(e.target).data('btn-path') == 'pay') {
 					// do something
 				}
 
-				$($($(e.target).parent()).children()).each(function(index, value) {
+				$(e.target).siblings().each(function(index, value) {
 					$(value).removeClass('active')
 				})
 
 				$(e.target).addClass('active')
-
 			}
 		}
 	})
 }
 
-let subProductSaveBtn = () => {
-	var productData = []
-		$('#subProductsModal .modal-body .card').each(function(index, value) {
-			let card = $(value)
-			let prodId = card.data('prod-id')
-			let units = $(card.find('input')).val()
+let getInvoiceItems = () => {
+	let invoiceId = $('input[name="invoice-id"]').val()
 
-			productData.push({
-				prodId: prodId,
-				units: units
-			})
+	$.get(`/invoice-get-sub-product/${invoiceId}`)
+	.done(function(data) {
+		$('#invoice-div').empty().html(data)
+	})
+}
+
+let subProductSave = () => {
+	var productData = []
+	let invoiceId = $('input[name="invoice-id"]').val()
+
+	$('#subProductsModal .modal-body .card').each(function(index, value) {
+		let card = $(value)
+		let prodId = card.data('prod-id')
+		let units = $(card.find('input')).val()
+
+		if (!(units)) {
+			units = 0 
+		}
+
+		productData.push({
+			prodId: prodId,
+			units: units
 		})
-		let invoiceId = $('input[name="invoice-id"]').val()
-		
+	})
+
+	new Promise((resolve, reject) => {
 		$.post(`/update-sub-product/${invoiceId}`, { 
-					productData: JSON.stringify(productData), 
-					csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val()
+				productData: JSON.stringify(productData), 
+				csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val()
 				})
 		.done(function(data) {
 			console.log(data)
 			$('#subProductsModal').modal('hide')
-			getTotal()
+			resolve()
 		})
-
-
+	}).then(getTotal)
 }
 
-// Update Sub Product event
-let updateSubProductEvent = () => {
-	$('#subProductsModal .modal-body').click(function(e) {
-		if ($(e.target).data('action')) {
-			let container = $($(e.target).parentsUntil('.modal-body'))
 
-			let subProdId = $(container[container.length-1]).data('prod-id')
-			let inp = $($(container).find('input.form-control')[0])
-
+let subProductAddMinus = () => {
+	$('#subProductsModal .modal-body .card').each(function(index, value) {
+		$(value).off()
+		$(value).click(function(e) {
 			if ($(e.target).data('action') == 'add') {
-				inp.val(Number(inp.val()) + 1)
-			} else {
-				if ((Number(inp.val())  - 1) >= 0) {
-					inp.val(Number(inp.val()) - 1)
+				let input = $($(value).find('input'))
+				input.val(Number(input.val()) + 1)
+			} else if ($(e.target).data('action') == 'minus') {
+				let input = $($(value).find('input'))
+				if ((Number(input.val())  - 1) >= 0) {
+					input.val(Number(input.val()) - 1)
 				} else {
-					inp.val('0')
+					input.val('0')
 				}
 			}
-		}
+		})
 	})
 }
 
@@ -247,7 +283,7 @@ let getTotal = () => {
 	$.get(`/get-total/${$('input[name="invoice-id"]').val()}`)
 	.done(function(data) {
 		if (JSON.parse(data).total_price__sum) {
-			$('#total span').html(`₱${JSON.parse(data).total_price__sum}`)
+			$('#total span').html(`₱${formatNum(JSON.parse(data).total_price__sum)}`)
 		} else {
 			$('#total span').html(`₱0`)
 		}

@@ -1,11 +1,12 @@
-
+{% load humanize %}
 
 {% for sub_product in sub_products %}
 <div class="card my-1" data-prod-id="{{sub_product.id}}">
-   	<div class="card-header">
+   	<div class="card-header py-1">
    	  <div class="d-flex justify-content-center align-items-center">
    		<div class="w-50">
-	   		<h5 class="m-0">{{sub_product.description}} @ {{sub_product.unit_price}}</h5>
+	   		<p class="m-0">{{sub_product.description}}</p>
+	   		<p class="m-0">₱{{sub_product.unit_price | intcomma }}</p>
 	   	</div>
 	    <div class="input-group d-flex justify-content-center align-items-center w-50">
 		  <div class="input-group-prepend">
