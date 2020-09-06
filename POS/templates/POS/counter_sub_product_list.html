@@ -1,14 +1,13 @@
 {% load humanize %}
-
 {% for sub_product in sub_products %}
-<div class="card my-1" data-prod-id="{{sub_product.id}}" search="{{sub_product.description}}">
+<div class="card my-2" data-prod-id="{{sub_product.id}}" search="{{sub_product.description}}">
    	<div class="card-header py-1">
-   	  <div class="d-flex justify-content-center align-items-center">
-   		<div class="w-50">
+   	  <div class="row ">
+   		<div class="col-7 p-0 py-1 pl-2">
 	   		<p class="m-0">{{sub_product.description}}</p>
-	   		<p class="m-0">₱{{sub_product.unit_price | intcomma }}</p>
+	   		<p class="m-0 badge badge-pill badge-primary">₱{{sub_product.unit_price | intcomma }}</p>
 	   	</div>
-	    <div class="input-group d-flex justify-content-center align-items-center w-50">
+	    <div class="input-group col-5 p-0 d-flex align-items-center">
 		  <div class="input-group-prepend">
 		    <button class="btn btn-danger" data-action="minus">-</button>
 		  </div>

@@ -230,18 +230,24 @@ let changeCustomer = (custId) => {
 	})
 }
 
-let search = (q, cont) => {
-	$(cont.children()).each(function(index, value) {
-		if ($(value).attr('search').toLowerCase().includes(q.toLowerCase())) {
-			$(value).css('display', 'block')
-		} else {
-			$(value).css('display', 'none')
-		}
-	})
-}
-
-
 let getPay = () => {
+	let invId = $('input[name="invoice-id"]').val()
+	new Promise((resolve, reject) => {
+		$.get(`/pay/${invId}`, function(data) {
+			$('.container').empty().html(data)
+			resolve()
+		})
+		.then(getTotal)
+		.then(payEvent)
+		.then(() => {
+			$.get(`/get-total/${$('input[name="invoice-id"]').val()}`)
+			.done(function(data) {
+				if (JSON.parse(data).total_price__sum) {
+					$('input[name="cash"]').val(JSON.parse(data).total_price__sum)
+				} 
+			})
+		})
+	})
 
 }
 
@@ -262,6 +268,7 @@ let btnGroupEvent = () => {
 
 				if ($(e.target).data('btn-path') == 'pay') {
 					// do something
+					getPay()
 				}
 
 				$(e.target).siblings().each(function(index, value) {
@@ -282,25 +289,35 @@ let getInvoiceItems = () => {
 	.done(function(data) {
 		$('#invoice-div').empty().html(data)
 
-		// edit events
-		$('.bi-pencil').each((index, value) => {
-			let transId = $($(value).parentsUntil('.card').last()).data('product-transaction-id')
-			let prodName = $($(value).parentsUntil('.card').last()).data('name')
-			let units = $($(value).parentsUntil('.card').last()).data('units')
-			$(value).click(() => {
-				$('#invoiceEditUnit input[name="prod-trans-id"]').val(transId)
-				$('#invoiceEditUnit .modal-title').text(prodName)
-				$('#invoiceEditUnit #units').val(units)
-			})
+		$('#invoice-div').off()
+		$('#invoice-div').click(function(e) {
+			let target = $(e.target)
+			
+			if (target.data('action')) {
+				let transId = $($(target).parentsUntil('.card').last()).data('product-transaction-id')
+				let prodName = $($(target).parentsUntil('.card').last()).data('name')
+				if (target.data('action') == 'edit') {
+				// Edits product listed in invoice
+
+					let units = $($(target).parentsUntil('.card').last()).data('units')
+					$('#invoiceEditUnit input[name="prod-trans-id"]').val(transId)
+					$('#invoiceEditUnit .modal-title').text(prodName)
+					$('#invoiceEditUnit #units').val(units)
+				} else {
+					// Deletes product listed in invoice
+					$('#invoiceDelete').find('.modal-title').text(prodName)
+					$('#invoiceDelete input[name="prod-trans-id"]').val(transId)
+				}
+					
+			}
+			
+			if (!target.data('action')) {
+				$(target.parentsUntil(this).last()).toggleClass('bg-warning')
+			}
+			
+			
 		})
 
-		$('.bi-trash').each((index, value) => {
-			let transId = $($(value).parentsUntil('.card').last()).data('product-transaction-id')
-			$(value).click(() => {
-				$('#invoiceDelete input[name="prod-trans-id"]').val(transId)
-				console.log($('#invoiceDelete input[name="prod-trans-id"]').val())
-			})
-		})
 	})
 }
 
@@ -402,5 +419,25 @@ let getTotal = () => {
 		} else {
 			$('#total span').html(`₱0`)
 		}
+	})
+}
+
+let payEvent = () => {
+	$('input[name="cash"]').keyup(function() {
+		let amount = $(this).val()
+		let payable = Number($('#total span').text().replace('₱', ''))
+		$('#change span').text(`₱${formatNum(payable - amount)}`)
+	})
+
+	$('#pay-btn').click(function() {
+		let invId = $('input[name="invoice-id"]').val()
+		$.post(`/pay/payment/cash/${invId}`, {
+			csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
+			amountPaid: $('input[name="cash"]').val()
+		})
+		.done(function(data) {
+			console.log(data)
+			window.location.href = '/handler'
+		})
 	})
 }

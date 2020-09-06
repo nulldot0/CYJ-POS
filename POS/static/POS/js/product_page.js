@@ -5,7 +5,7 @@ $(document).ready(function() {
 	})
 
 	$('#searchProduct').keyup(function() {
-		search($(this).val(), '#productListContainer')
+		search($(this).val(), $('#productListContainer'))
 	})
 
 	$('#addSubProductBtn').click(function() {
@@ -34,15 +34,15 @@ $(document).ready(function() {
 
 })
 
-let search = (toSearch, targetDivId) => {
-	$(`${targetDivId} .card`).each(function(index, value) {
-		if (!(String($(value).data('search')).toLowerCase().includes(toSearch.toLowerCase()))) {
-			$(value).css('display', 'none')
-		} else {
-			$(value).css('display', 'block')
-		}
-	})
-}
+// let search = (toSearch, targetDivId) => {
+// 	$(`${targetDivId} .card`).each(function(index, value) {
+// 		if (!(String($(value).data('search')).toLowerCase().includes(toSearch.toLowerCase()))) {
+// 			$(value).css('display', 'none')
+// 		} else {
+// 			$(value).css('display', 'block')
+// 		}
+// 	})
+// }
 
 let editDeleteSubProductEvent = () => {
 	$('#sub-product-container').click(function(e) {

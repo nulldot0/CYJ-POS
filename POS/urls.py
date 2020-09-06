@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     path('', views.main, name='index'),
     path('handler/', views.handler_page, name='handler-page'),
+    path('handler/get-invoices/', views.handler_get_invoice),
     path('product-page/', views.product_page, name='product-page'),
     path('product-page/get-products/', views.product_page_get_products),
     path('product-page/get-categories/', views.product_page_get_categories),
@@ -24,5 +25,7 @@ urlpatterns = [
     path('update-sub-product/<int:pk>', views.update_sub_product),
     path('invoice-get-sub-product/<int:pk>', views.invoice_get_sub_product),
     path('invoice/<int:pk>', views.invoice, name='invoice'),
+    path('pay/<int:pk>', views.pay_page, name='pay'),
+    path('pay/payment/<str:method>/<int:pk>', views.pay_payment),
     path('get-total/<int:pk>', views.get_invoice_total),
 ]

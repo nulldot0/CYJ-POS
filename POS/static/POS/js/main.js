@@ -22,16 +22,38 @@ $(document).ready(function() {
 
 
 let formatNum = (num) => {
-	num = String(num).split('').reverse()
-	let ret_num = []
-	for (i=0; i < num.length; i++) {
-		if (i % 3 == 0 && i != 0) {
-			ret_num.push(',')
+	if (num < 0) {
+		num = String(Math.abs(num)).split('').reverse()
+		let ret_num = []
+		for (i=0; i < num.length; i++) {
+			if (i % 3 == 0 && i != 0) {
+				ret_num.push(',')
+			}
+			ret_num.push(num[i])
 		}
 
-		ret_num.push(num[i])
-	}
+		return (`-${ret_num.reverse().join('')}`)
+	} else {
+		num = String(num).split('').reverse()
+		let ret_num = []
+		for (i=0; i < num.length; i++) {
+			if (i % 3 == 0 && i != 0) {
+				ret_num.push(',')
+			}
+			ret_num.push(num[i])
+		}
 
-	return (ret_num.reverse().join(''))
+		return ret_num.reverse().join('')
+	}
+}
+
+let search = (q, cont) => {
+	$(cont.children()).each(function(index, value) {
+		if ($(value).attr('search').toLowerCase().includes(q.toLowerCase())) {
+			$(value).css('display', 'block')
+		} else {
+			$(value).css('display', 'none')
+		}
+	})
 }
 

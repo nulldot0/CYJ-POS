@@ -1,5 +1,5 @@
 from django.shortcuts import render, HttpResponse, redirect
-from django.db.models import Sum
+from django.db.models import Sum, Count
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from .models import *
@@ -186,13 +186,13 @@ def update_sub_product(request, pk):
 				else:
 					transaction = transaction[0]
 
-				if int(data['units']) != 0:
+				if float(data['units']) != 0:
 					transaction.no_of_units = data['units']
 					transaction.save()
 				else:
 					transaction.delete()
 			else:
-				if int(data['units']) != 0:
+				if float(data['units']) != 0:
 					ProductTransaction.objects.create(basket_id=invoice, 
 						product=sub_product, no_of_units=data['units'], added_by=user).save()
 
@@ -246,12 +246,36 @@ def invoice_get_sub_product(request, pk):
 # HANDLER PAGE
 @login_required(login_url='/admin/')
 def handler_page(request):
-	return render(request, 'POS/handler_page.html', { 
-		'invoices': request.user.basket_set.all()
+	return render(request, 'POS/handler_page.html')
+
+def handler_get_invoice(request):
+	return render(request, 'POS/handler_invoice_list.html', {
+			'invoices': [ {
+				'invoice': i,
+				'items': i.producttransaction_set.all().aggregate(Count('id'))['id__count'],
+				'total': i.producttransaction_set.all().aggregate(Sum('total_price'))['total_price__sum']
+			} for i in request.user.basket_set.all()]
 		})
-	
+
+# PAY PAGE
+def pay_page(request, pk):
+	return render(request, 'POS/pay.html')
+
+def pay_payment(request, method, pk):
+	if request.method == 'POST':
+		amount_paid = request.POST.get('amountPaid')
+		basket = Basket.objects.get(pk=pk)
+		basket_total_price = basket.producttransaction_set.all().aggregate(Sum('total_price'))['total_price__sum']
+		if method == 'cash' and (basket_total_price - int(amount_paid)) == 0:
+			basket.status = 'paid'
+			basket.save()
+
+		InvoiceTransaction.objects.create(basket_id=basket, payment_method=method, amount_paid=amount_paid)
+		return HttpResponse('done')
+		
 def get_invoice_total(request, pk):
 	invoice = Basket.objects.get(pk=pk)
 	total = invoice.producttransaction_set.all().aggregate(
 		Sum('total_price'))
 	return HttpResponse(dumps(total))
+

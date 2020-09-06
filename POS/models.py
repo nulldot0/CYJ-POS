@@ -33,7 +33,7 @@ class Product(models.Model):
 
 class SubProduct(models.Model):
 	product_family = models.ForeignKey(Product, on_delete=models.CASCADE)
-	description = models.TextField()
+	description	 = models.TextField()
 	unit_price = models.DecimalField(max_digits=8, decimal_places=2)
 	unit_cost = models.DecimalField(max_digits=8, decimal_places=2)
 	stock = models.PositiveIntegerField(default=0),
@@ -79,4 +79,18 @@ class ProductTransaction(models.Model):
 		super(ProductTransaction, self).save(*args, **kwargs) 
 
 	def __str__(self):
-		return f'added {self.no_of_units} {self.product} to Basket No.{self.basket_id.id}  -{self.added_by}' 
+		return f'added {self.no_of_units} {self.product} to Basket No.{self.basket_id.id}  -{self.added_by}'
+
+class InvoiceTransaction(models.Model):
+	payment_method_choices = [
+		('cash', 'cash'),
+		('credit', 'credit')
+	]
+
+	basket_id = models.ForeignKey(Basket, on_delete=models.CASCADE)
+	payment_method = models.CharField(max_length=50, choices=payment_method_choices)
+	amount_paid = models.PositiveIntegerField()
+	date_added = models.DateTimeField(auto_now_add=True)
+
+	def __str__(self):
+		return f'{self.date_added}, {self.amount_paid} pesos - id:{self.basket_id.pk}'
