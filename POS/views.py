@@ -37,6 +37,30 @@ def product_page_get_categories(request):
 	categories = [ {'id': i.id, 'name': i.name} for i in Category.objects.all().order_by('name')]
 	return HttpResponse(dumps(categories))
 
+def product_page_get_sub_product(request, pk):
+	product = Product.objects.get(pk=pk)
+	sub_products = product.subproduct_set.all()
+
+	return render(request, 'POS/product_page_sub_product_list.html', {
+			'sub_products': sub_products
+		})
+
+def product_page_modify_sub_product(request, action, pk):
+	if request.method == 'POST':
+		sub_product = SubProduct.objects.get(pk=pk)
+		if action == 'edit':
+			sub_product.description = request.POST.get('description')
+			sub_product.unit_price = request.POST.get('unitPrice')
+			sub_product.unit_cost = request.POST.get('unitCost')
+			sub_product.save()
+			return HttpResponse(dumps({ 'productId': sub_product.id, 'message': 'edited' }))			 
+		else:
+			sub_product_id = sub_product.id
+			sub_product.delete()
+			return HttpResponse(dumps({'productId': sub_product_id, 'message': 'deleted'}))
+	else:
+		return redirect('/handler')
+
 def product_page_modify_product(request, pk):
 	# TODO: redirect a user to a page where you can edit the product
 	return render(request, 'POS/product_page_modify_product.html', {
@@ -224,14 +248,6 @@ def invoice_get_sub_product(request, pk):
 def handler_page(request):
 	return render(request, 'POS/handler_page.html', { 
 		'invoices': request.user.basket_set.all()
-		})
-
-def product_page_get_sub_product(request, pk):
-	product = Product.objects.get(pk=pk)
-	sub_products = product.subproduct_set.all()
-
-	return render(request, 'POS/product_page_sub_product_list.html', {
-			'sub_products': sub_products
 		})
 	
 def get_invoice_total(request, pk):

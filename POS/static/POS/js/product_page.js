@@ -1,6 +1,4 @@
 $(document).ready(function() {
-	addProductBtnEvent()
-	modifyProductEvent()
 	$('#newCategoryModal #save').click(function() {
 		addNewCategory($('#newCategoryModal #categoryName').val())
 		getCategories()
@@ -10,13 +8,29 @@ $(document).ready(function() {
 		search($(this).val(), '#productListContainer')
 	})
 
+	$('#addSubProductBtn').click(function() {
+		$('#newSubProductModal').find('#save').off()
+		$('#newSubProductModal #save').click(function() {
+			addNewSubProduct().then(getSubProducts)
+		})
+	})
+
+	$('#addProductBtn').click(function() {
+		$('#ProductModal #save').off()
+			$('#ProductModal #save').click(function() {
+				addEditProduct($('#ProductModal #productName').val(), 
+					$('#ProductModal #category').val())
+			})
+	})
+
+	modifyProductEvent()
+
 	// adds event on this container for edit
 	getProducts().then(editProductEvent)
 	getSubProducts()
 	getCategories()
 
 	editDeleteSubProductEvent()
-
 
 })
 
@@ -30,34 +44,57 @@ let search = (toSearch, targetDivId) => {
 	})
 }
 
-let addProductBtnEvent = () => {
-	$('#addProductBtn').off()
-	$('#addProductBtn').click(function() {
-		$('#ProductModal #save').off()
-			$('#ProductModal #save').click(function() {
-				addEditProduct($('#ProductModal #productName').val(), 
-					$('#ProductModal #category').val())
-			})
-	})
-}
-
 let editDeleteSubProductEvent = () => {
 	$('#sub-product-container').click(function(e) {
 		let target = $(e.target)
 		if (target.data('action')) {
-			let modal = $('#newSubProductModal')
 			let root = target.parentsUntil('#sub-product-container').last()
-			modal.find('.modal-title')
-				.text(`${root.data('title')} - ${root.data('description')}`)
-				
+			
+
 			if (target.data('action') == 'edit') {
+				let modal = $('#newSubProductModal')
+
+				// changes title modal
+				modal.find('.modal-title')
+				.text(`${root.data('title')} - ${root.data('description')}`)
+				// changes input on #newSubProductModal
 				modal.find('#description').val(root.data('description'))
 				modal.find('#unit-price').val(root.data('unit-price'))
 				modal.find('#unit-cost').val(root.data('unit-cost'))
+				modal.find('input[name="sub-product-id"]').val(root.data('sub-product-id'))
+
+				// adds event onclick on #newSubProductModal
+				modal.find('#save').off()
+				modal.find('#save').click(function() {
+					let subproductId = modal.find('input[name="sub-product-id"]').val()
+					$.post(`/product-page/modify-sub-product/edit/${subproductId}`, {
+							csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+							description: modal.find('#description').val(),
+							unitPrice: modal.find('#unit-price').val(),
+							unitCost:modal.find('#unit-cost').val()
+						}).done(function(data) {
+							console.log(data)
+							modal.modal('hide')
+							getSubProducts()
+						})
+				})
 			} 
 
 			if (target.data('action') == 'delete') {
 				// delete sub product
+				let modal = $('#deleteSubProductModal')
+				modal.find('input[name="sub-product-id"]').val(root.data('sub-product-id'))
+				modal.find('#yes').off()
+				modal.find('#yes').click(function() {
+					let subproductId = modal.find('input[name="sub-product-id"]').val()
+					$.post(`/product-page/modify-sub-product/delete/${subproductId}`, {
+						csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+					}).done(function(data) {
+						console.log(data)
+						modal.modal('hide')
+						getSubProducts()
+					})
+				})
 
 			}
 		}
@@ -202,9 +239,5 @@ let modifyProductEvent = () => {
 				resolve()
 			})
 		}).then(classToggle)
-	})
-
-	$('#newSubProductModal #save').click(function() {
-		addNewSubProduct().then(getSubProducts)
 	})
 }

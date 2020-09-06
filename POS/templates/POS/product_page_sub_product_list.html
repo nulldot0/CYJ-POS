@@ -1,5 +1,5 @@
 {% for sub_product in sub_products %}
-<div class="card my-2 shadow" data-description="{{sub_product.description}}" data-unit-price="{{sub_product.unit_price}}" data-unit-cost="{{sub_product.unit_cost}}" data-title="{{sub_product.product_family}}">
+<div class="card my-2 shadow" data-description="{{sub_product.description}}" data-unit-price="{{sub_product.unit_price}}" data-unit-cost="{{sub_product.unit_cost}}" data-title="{{sub_product.product_family}}" data-sub-product-id={{sub_product.pk}}>
 	<div class="card-header d-flex justify-content-between">
 		<div>
 			<p class="m-0"><span class="font-weight-bold">Description:</span> {{sub_product.description}}</p>
@@ -8,7 +8,7 @@
 		</div>
 		<div class="d-flex flex-column">
 			<img src="/static/POS/icons/pencil.svg" class="my-1" data-toggle="modal" data-target="#newSubProductModal" data-action="edit"/>
-			<img src="/static/POS/icons/trash.svg" class="my-1" data-action="delete"/>
+			<img src="/static/POS/icons/trash.svg" class="my-1" data-toggle="modal" data-target="#deleteSubProductModal" data-action="delete"/>
 		</div>
 	</div>
 </div>

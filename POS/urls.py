@@ -9,6 +9,7 @@ urlpatterns = [
     path('product-page/get-categories/', views.product_page_get_categories),
     path('product-page/modify-product/<int:pk>', views.product_page_modify_product, name='modify-product'),
     path('product-page/get-sub-product/<int:pk>', views.product_page_get_sub_product),
+    path('product-page/modify-sub-product/<str:action>/<int:pk>', views.product_page_modify_sub_product),
     path('add-new-product/', views.add_new_product),
     path('add-new-sub-product/<int:pk>', views.add_new_sub_product),
     path('add-new-category/', views.add_new_category),

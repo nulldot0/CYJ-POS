@@ -49,7 +49,7 @@ class SubProduct(models.Model):
 		return  f'{self.product_family.name} {self.description} @ {self.unit_price}'
 
 	class Meta:
-		ordering = ['description']
+		ordering = ['product_family', 'description']
 
 class Basket(models.Model):
 	default_customer = Customer.objects.get(name='Guest')
