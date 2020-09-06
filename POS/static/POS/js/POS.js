@@ -9,9 +9,6 @@ $(document).ready(function() {
 		$('#newCustomerModal').modal('hide')
 	})
 
-	// customer selection search
-
-
 	$('#selectionCustomerModal').click(function(e) {
 		if ($(e.target).hasClass('list-group-item-action')) {
 			$(this).modal('hide')
@@ -22,12 +19,16 @@ $(document).ready(function() {
 
 	btnGroupEvent()
 	getCounter()
+	invoiceModalEvent()
+	searchEvent.subProduct()
 })
 
 
-// Events
+// SIMPLE LOADER
 let loader = $('.spinner-border')
 
+// SEARCH EVENTS
+// -----------------------------------------------------------------
 let searchEvent = {
 	selectionCustomer: () => {
 			$('#selection-customer-search').keyup(function() {
@@ -38,9 +39,58 @@ let searchEvent = {
 		$('input[name="productSearch"]').keyup(function() {
 			search($(this).val(), $('#products-div'))
 		})
+	},
+	subProduct: () => {
+		$('input[name="sub-product"]').keyup(function() {
+			search($(this).val(), $('#sub-product-div'))
+		})
+	},
+	invoiceProduct: () => {
+		$('input[name="invoice-search"]').keyup(function() {
+			search($(this).val(), $('#invoice-div'))
+		})
 	}
 }
+// -------------------------------------------------------------------
 
+// MAIN EVENTS
+// -------------------------------------------------------------------
+let getCounter = () => {
+	return new Promise((resolve, reject) => {
+		let invId = $('input[name="invoice-id"]').val()
+		$.get(`/counter/${invId}`, function(data) {
+			$('.container').empty().html(data)
+		}).done(function() {
+			resolve()
+		})
+	})
+	
+	.then(getProducts)
+	.then(getFavorites)
+	.then(getCustomers)
+	.then(counterEvents)
+	.then(getTotal)
+	.then(searchEvent.selectionCustomer)
+	.then(searchEvent.product)
+	.then(subProductSave)
+}
+
+let getInvoice = () => {
+	let invId = $('input[name="invoice-id"]').val()
+	new Promise((resolve, reject) => {
+		$.get(`/invoice/${invId}`, function(data) {
+			$('.container').empty().html(data)
+			resolve()
+		})
+	})
+	.then(getInvoiceItems)
+	.then(getTotal)
+	.then(searchEvent.invoiceProduct)
+}
+// ----------------------------------------------------------
+
+
+// SIMPLE EVENTS
 // gets all products
 let getProducts = (targetDiv=$('#products-div'), category='all') => {
 	loader = loader.clone().removeClass('d-none')
@@ -57,10 +107,22 @@ let getFavorites = (userID, targetDiv=$('#favorites-div')) => {
 	targetDiv.empty().html(loader)
 }
 
-// fetch all customer
+// get all customer
 let getCustomers = (targetDiv=$('#selectionCustomerModal .modal-body')) => {
 	$.get('get-customers/').done(function(data) {
 		targetDiv.empty().html(data)
+	})
+}
+
+let counterEvents = () => {
+	// Gets all subproducts 
+	$('#main-product-container').click(function(e) {
+		if ($(e.target).data('prod-id')) {
+			let prodId = $(e.target).data('prod-id')
+			let prodName = $(e.target).data('prod-name')
+			$($('#subProductsModal .modal-title')).text(prodName)
+			getSubProductById(prodId)
+		}
 	})
 }
 
@@ -81,6 +143,42 @@ let getSubProductById = (prodId) => {
 	})
 	.then(getSubProductUnits)
 	.then(subProductAddMinus)
+}
+
+// triggers when sub product modal save is clicked
+let subProductSave = () => {
+	$($('#subProductsModal #save')).click(function() {
+		var productData = []
+		let invoiceId = $('input[name="invoice-id"]').val()
+
+		$('#subProductsModal .modal-body .card').each(function(index, value) {
+			let card = $(value)
+			let prodId = card.data('prod-id')
+			let units = $(card.find('input')).val()
+
+			if (!(units)) {
+				units = 0 
+			}
+
+			productData.push({
+				prodId: prodId,
+				units: units
+			})
+		})
+
+		new Promise((resolve, reject) => {
+			$.post(`/update-sub-product/${invoiceId}`, { 
+					productData: JSON.stringify(productData), 
+					csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val()
+					})
+			.done(function(data) {
+				console.log(data)
+				$('#subProductsModal').modal('hide')
+				resolve()
+			})
+		}).then(getTotal)
+
+	})
 }
 
 // Get the Sub Products no. of units on subProductModal
@@ -142,44 +240,9 @@ let search = (q, cont) => {
 	})
 }
 
-let getCounter = () => {
-	return new Promise((resolve, reject) => {
-		let invId = $('input[name="invoice-id"]').val()
-		$.get(`/counter/${invId}`, function(data) {
-			$('.container').empty().html(data)
-		}).done(function() {
-			resolve()
-		})
-	})
-
-	.then(getProducts)
-	.then(getFavorites)
-	.then(getCustomers)
-	.then(counterEvents)
-	.then(getTotal)
-	.then(searchEvent.selectionCustomer)
-	.then(searchEvent.product)
-}
 
 let getPay = () => {
 
-}
-
-
-let counterEvents = () => {
-	// Gets all subproducts
-	$('#main-product-container').click(function(e) {
-		if ($(e.target).data('prod-id')) {
-			let prodId = $(e.target).data('prod-id')
-			let prodName = $(e.target).data('prod-name')
-			$($('#subProductsModal .modal-title')).text(prodName)
-			getSubProductById(prodId)
-			$($('#subProductsModal #save')).off()
-			$($('#subProductsModal #save')).click(function() {
-				subProductSave()
-			})
-		}
-	})
 }
 
 let btnGroupEvent = () => {
@@ -194,14 +257,7 @@ let btnGroupEvent = () => {
 
 				if ($(e.target).data('btn-path') == 'invoice') {
 					// do something
-					new Promise((resolve, reject) => {
-						$.get(`/invoice/${invId}`, function(data) {
-							$('.container').empty().html(data)
-							resolve()
-						})
-					})
-					.then(getInvoiceItems)
-					.then(getTotal)
+						getInvoice()
 				}
 
 				if ($(e.target).data('btn-path') == 'pay') {
@@ -219,46 +275,105 @@ let btnGroupEvent = () => {
 }
 
 let getInvoiceItems = () => {
+	// Gets invoice item to display in index
 	let invoiceId = $('input[name="invoice-id"]').val()
 
 	$.get(`/invoice-get-sub-product/${invoiceId}`)
 	.done(function(data) {
 		$('#invoice-div').empty().html(data)
+
+		// edit events
+		$('.bi-pencil').each((index, value) => {
+			let transId = $($(value).parentsUntil('.card').last()).data('product-transaction-id')
+			let prodName = $($(value).parentsUntil('.card').last()).data('name')
+			let units = $($(value).parentsUntil('.card').last()).data('units')
+			$(value).click(() => {
+				$('#invoiceEditUnit input[name="prod-trans-id"]').val(transId)
+				$('#invoiceEditUnit .modal-title').text(prodName)
+				$('#invoiceEditUnit #units').val(units)
+			})
+		})
+
+		$('.bi-trash').each((index, value) => {
+			let transId = $($(value).parentsUntil('.card').last()).data('product-transaction-id')
+			$(value).click(() => {
+				$('#invoiceDelete input[name="prod-trans-id"]').val(transId)
+				console.log($('#invoiceDelete input[name="prod-trans-id"]').val())
+			})
+		})
 	})
 }
 
-let subProductSave = () => {
-	var productData = []
-	let invoiceId = $('input[name="invoice-id"]').val()
 
-	$('#subProductsModal .modal-body .card').each(function(index, value) {
-		let card = $(value)
-		let prodId = card.data('prod-id')
-		let units = $(card.find('input')).val()
-
-		if (!(units)) {
-			units = 0 
+let invoiceModalEvent = () => {
+	$('#invoiceEditUnit .modal-body .btn').each(function(index, value) {
+		if ($(value).data('action')) {
+			if ($(value).data('action') == 'plus') {
+				$(value).click(function() {
+					let input = $('#invoiceEditUnit #units')
+					input.val(Number(input.val()) + 1)
+				})
+			} else {
+				$(value).click(function() {
+					let input = $('#invoiceEditUnit #units')
+					if ((Number(input.val())  - 1) >= 0) {
+						input.val(Number(input.val()) - 1)
+					} else {
+						input.val('0')
+					}
+				})
+			}
 		}
-
-		productData.push({
-			prodId: prodId,
-			units: units
-		})
 	})
 
-	new Promise((resolve, reject) => {
-		$.post(`/update-sub-product/${invoiceId}`, { 
+	$('#invoiceEditUnit #save').click(function() {
+		productData = [
+			{
+				prodId: $('#invoiceEditUnit input[name="prod-trans-id"]').val(),
+				units: $('#invoiceEditUnit #units').val()
+			}
+		]
+
+		let invoiceId = $('input[name="invoice-id"]').val()
+		new Promise((resolve, reject) => {
+			$.post(`/update-sub-product/${invoiceId}`, { 
 				productData: JSON.stringify(productData), 
 				csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val()
-				})
-		.done(function(data) {
-			console.log(data)
-			$('#subProductsModal').modal('hide')
-			resolve()
-		})
-	}).then(getTotal)
-}
+			}).done(function(data) {
+				console.log(data)
 
+				$('#invoiceEditUnit').modal('hide')
+				resolve()
+			})
+		})
+
+		.then(getInvoiceItems)
+		.then(getTotal)
+	})
+
+	$('#invoiceDelete #yes').click(function() {
+		let invoiceId = $('input[name="invoice-id"]').val()
+		new Promise((resolve, reject) => {
+			$.post(`/update-sub-product/${invoiceId}`, { 
+				productData: JSON.stringify([
+						{
+							prodId:$('#invoiceDelete input[name="prod-trans-id"]').val(),
+							units: 0
+						}
+					]), 
+				csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val()
+			}).done(function(data) {
+				console.log(data)
+
+				$('#invoiceDelete').modal('hide')
+				resolve()
+			})
+		})
+
+		.then(getInvoiceItems)
+		.then(getTotal)
+	})
+}
 
 let subProductAddMinus = () => {
 	$('#subProductsModal .modal-body .card').each(function(index, value) {

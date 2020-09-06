@@ -1,7 +1,7 @@
 {% load humanize %}
 
 {% for sub_product in sub_products %}
-<div class="card my-1" data-prod-id="{{sub_product.id}}">
+<div class="card my-1" data-prod-id="{{sub_product.id}}" search="{{sub_product.description}}">
    	<div class="card-header py-1">
    	  <div class="d-flex justify-content-center align-items-center">
    		<div class="w-50">

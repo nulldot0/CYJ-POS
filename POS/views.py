@@ -6,6 +6,7 @@ from .models import *
 from json import dumps, loads
 # Create your views here.
 
+# MAIN PAGE
 @login_required(login_url='/admin/')
 def main(request):
 	invoice_id = request.GET.get('invoice-id')
@@ -44,25 +45,84 @@ def product_page_modify_product(request, pk):
 			'categories': Category.objects.all()
 		})
 
+def add_new_product(request):
+	if request.method == 'POST':
+		category = Category.objects.get(pk=request.POST.get('productCategory'))
+		Product.objects.create(category=category, name=request.POST.get('productName'))
+
+		return HttpResponse('Successfully added %s' %(request.POST.get('productName')))
+	else:
+		return redirect('/handler')
+
+def add_new_category(request):
+	if request.method == 'POST':
+		Category.objects.create(name=request.POST.get('categoryName'))
+		return HttpResponse('Successfully added category %s' %(request.POST.get('categoryName')))
+	else:
+		return redirect('/handler')
+
+def add_new_sub_product(request, pk):
+	if request.method == 'POST':
+		product = Product.objects.get(pk=pk)
+
+		SubProduct.objects.create(
+			product_family=product, 
+			  description=request.POST.get('description'),
+			    unit_price=request.POST.get('unitPrice'),
+				  unit_cost=request.POST.get('unitCost')
+			)
+
+		return HttpResponse('ok')
+
+	else:
+		return redirect('/handler')
+
+def edit_product(request, pk):
+	if request.method == 'POST':
+		product = Product.objects.get(pk=pk)
+		category = Category.objects.get(pk=request.POST.get('productCategory'))
+		previous_name = str(product.name)
+		previous_category = str(product.category.name)
+
+		product.category = category
+		product.name = request.POST.get('productName')
+
+		if previous_name != product.name:
+			m1 = f'name changed from {previous_name} to {product.name}'
+		else:
+			m1 = ''
+		if previous_category != product.category.name:
+			m2 = f' category changed from {previous_category} to {product.category.name}'
+		else:
+			m2 = ''
+
+		message = f'{m1}{m2}'
+
+		product.save()
+
+		data = {
+			'message': message,
+			'name': product.name,
+			'categoryName': product.category.name,
+			'categoryId': product.category.id,
+		}
+
+		return HttpResponse(dumps(data))
+	else:
+		return redirect('/handler')
+
 # -----------------------------------------------------
 
-def get_favorites(request):
-	pass
-
+# COUNTER PAGE
 def counter_get_products(request):
 	return render(request, 'POS/counter_product_list.html', {
 			'products': Product.objects.all().order_by('name')
 		})
 
-def invoice_get_sub_product(request, pk):
-	return render(request, 'POS/invoice_product_list.html', {
-			'items': Basket.objects.get(pk=pk).producttransaction_set.all()
-		})
-
 def get_sub_products_by_id(request):
 	prod_id = request.GET.get('product_id')
 	return render(request, 'POS/counter_sub_product_list.html', {
-			'sub_products': Product.objects.get(id=prod_id).subproduct_set.all()
+			'sub_products': Product.objects.get(id=prod_id).subproduct_set.all().order_by('description')
 		})
 
 def get_sub_products_units(request, pk):
@@ -134,11 +194,6 @@ def change_customer(request):
 	else:
 		return redirect('/')
 
-def invoice(request, pk):
-	invoice = Basket.objects.get(pk=pk)
-	return render(request, 'POS/invoice.html', {
-			'invoice': invoice,
-		})
 def counter(request, pk):
 	invoice = Basket.objects.get(pk=pk)
 
@@ -146,97 +201,41 @@ def counter(request, pk):
 			'invoice': invoice,
 		})
 
-
 def get_customers(request):
 	return render(request, 'POS/counter_customer_list.html', {
 			'customers': Customer.objects.all().order_by('name')
 		})
 
+# INVOICE PAGE
+def invoice(request, pk):
+	invoice = Basket.objects.get(pk=pk)
+	return render(request, 'POS/invoice.html', {
+			'invoice': invoice,
+		})
+
+def invoice_get_sub_product(request, pk):
+	return render(request, 'POS/invoice_product_list.html', {
+			'items': Basket.objects.get(pk=pk).producttransaction_set.all()
+		})
+
+
+# HANDLER PAGE
 @login_required(login_url='/admin/')
 def handler_page(request):
 	return render(request, 'POS/handler_page.html', { 
 		'invoices': request.user.basket_set.all()
 		})
 
+def product_page_get_sub_product(request, pk):
+	product = Product.objects.get(pk=pk)
+	sub_products = product.subproduct_set.all()
+
+	return render(request, 'POS/product_page_sub_product_list.html', {
+			'sub_products': sub_products
+		})
+	
 def get_invoice_total(request, pk):
 	invoice = Basket.objects.get(pk=pk)
 	total = invoice.producttransaction_set.all().aggregate(
 		Sum('total_price'))
 	return HttpResponse(dumps(total))
-
-def add_new_product(request):
-	if request.method == 'POST':
-		category = Category.objects.get(pk=request.POST.get('productCategory'))
-		Product.objects.create(category=category, name=request.POST.get('productName'))
-
-		return HttpResponse('Successfully added %s' %(request.POST.get('productName')))
-	else:
-		return redirect('/handler')
-
-def add_new_category(request):
-	if request.method == 'POST':
-		Category.objects.create(name=request.POST.get('categoryName'))
-		return HttpResponse('Successfully added category %s' %(request.POST.get('categoryName')))
-	else:
-		return redirect('/handler')
-
-def add_new_sub_product(request, pk):
-	if request.method == 'POST':
-		product = Product.objects.get(pk=pk)
-
-		SubProduct.objects.create(
-			product_family=product, 
-			  description=request.POST.get('description'),
-			    unit_price=request.POST.get('unitPrice'),
-				  unit_cost=request.POST.get('unitCost')
-			)
-
-		return HttpResponse('ok')
-
-	else:
-		return redirect('/handler')
-
-def get_sub_products(request, pk):
-	product = Product.objects.get(pk=pk)
-	sub_products = product.subproduct_set.all()
-	return HttpResponse(dumps([
-			{
-				'description': i.description,
-				'unit-price': float(i.unit_price),
-				'unit-cost': float(i.unit_cost),
-			} for i in sub_products ]))
-
-def edit_product(request, pk):
-	if request.method == 'POST':
-		product = Product.objects.get(pk=pk)
-		category = Category.objects.get(pk=request.POST.get('productCategory'))
-		previous_name = str(product.name)
-		previous_category = str(product.category.name)
-
-		product.category = category
-		product.name = request.POST.get('productName')
-
-		if previous_name != product.name:
-			m1 = f'name changed from {previous_name} to {product.name}'
-		else:
-			m1 = ''
-		if previous_category != product.category.name:
-			m2 = f' category changed from {previous_category} to {product.category.name}'
-		else:
-			m2 = ''
-
-		message = f'{m1}{m2}'
-
-		product.save()
-
-		data = {
-			'message': message,
-			'name': product.name,
-			'categoryName': product.category.name,
-			'categoryId': product.category.id,
-		}
-
-		return HttpResponse(dumps(data))
-	else:
-		return redirect('/handler')
-		

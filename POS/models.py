@@ -8,6 +8,9 @@ class Customer(models.Model):
 	def __str__(self):
 		return  self.name
 
+	class Meta:
+		ordering = ['name']
+
 class Category(models.Model):
 	name = models.CharField(max_length=100, unique=True)
 
@@ -16,6 +19,7 @@ class Category(models.Model):
 
 	class Meta:
 		verbose_name_plural = 'Categories'
+		ordering = ['name']
 
 class Product(models.Model):
 	name = models.CharField(max_length=30, unique=True)
@@ -23,6 +27,9 @@ class Product(models.Model):
 
 	def __str__(self):
 		return  self.name
+
+	class Meta:
+		ordering = ['name']
 
 class SubProduct(models.Model):
 	product_family = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -41,8 +48,12 @@ class SubProduct(models.Model):
 	def __str__(self):
 		return  f'{self.product_family.name} {self.description} @ {self.unit_price}'
 
+	class Meta:
+		ordering = ['description']
+
 class Basket(models.Model):
-	customer = models.ForeignKey(Customer, on_delete=models.CASCADE, default=1)
+	default_customer = Customer.objects.get(name='Guest')
+	customer = models.ForeignKey(Customer, on_delete=models.CASCADE, default=default_customer.pk)
 	handler = models.ForeignKey(User, on_delete=models.CASCADE)
 	date_created = models.DateTimeField(auto_now_add=True)
 	status = models.CharField(max_length=50, choices=[

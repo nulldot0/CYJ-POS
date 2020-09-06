@@ -15,6 +15,8 @@ $(document).ready(function() {
 	getSubProducts()
 	getCategories()
 
+	editDeleteSubProductEvent()
+
 
 })
 
@@ -36,6 +38,29 @@ let addProductBtnEvent = () => {
 				addEditProduct($('#ProductModal #productName').val(), 
 					$('#ProductModal #category').val())
 			})
+	})
+}
+
+let editDeleteSubProductEvent = () => {
+	$('#sub-product-container').click(function(e) {
+		let target = $(e.target)
+		if (target.data('action')) {
+			let modal = $('#newSubProductModal')
+			let root = target.parentsUntil('#sub-product-container').last()
+			modal.find('.modal-title')
+				.text(`${root.data('title')} - ${root.data('description')}`)
+				
+			if (target.data('action') == 'edit') {
+				modal.find('#description').val(root.data('description'))
+				modal.find('#unit-price').val(root.data('unit-price'))
+				modal.find('#unit-cost').val(root.data('unit-cost'))
+			} 
+
+			if (target.data('action') == 'delete') {
+				// delete sub product
+
+			}
+		}
 	})
 }
 
@@ -72,20 +97,7 @@ let getSubProducts = () => {
 	if ($('input[name="product-id"]').val()) {
 		$.get(`/product-page/get-sub-product/${$('input[name="product-id"]').val()}`)
 		.done(function(data) {
-			let jsonObj = JSON.parse(data)
-			$('#sub-product-container').empty()
-
-			$(jsonObj).each(function(index, value) {
-				$('#sub-product-container').append(
-				`<div class="card my-2 shadow">
-					<div class="card-header">
-						<p class="m-0"><span class="font-weight-bold">Description:</span> ${value.description}</p>
-						<p class="m-0"><span class="font-weight-bold">Price:</span> ₱${formatNum(value['unit-price'])}</p>
-						<p class="m-0"><span class="font-weight-bold">Cost:</span> ₱${formatNum(value['unit-cost'])}</p>
-					</div>
-				</div>`
-				)
-			})
+			$('#sub-product-container').empty().html(data)
 		})
 	}
 }
