@@ -52,8 +52,7 @@ class SubProduct(models.Model):
 		ordering = ['product_family', 'description']
 
 class Basket(models.Model):
-	default_customer = Customer.objects.get(name='Guest')
-	customer = models.ForeignKey(Customer, on_delete=models.CASCADE, default=default_customer.pk)
+	customer = models.ForeignKey(Customer, on_delete=models.CASCADE, default=1)
 	handler = models.ForeignKey(User, on_delete=models.CASCADE)
 	date_created = models.DateTimeField(auto_now_add=True)
 	status = models.CharField(max_length=50, choices=[
@@ -87,7 +86,7 @@ class InvoiceTransaction(models.Model):
 		('credit', 'credit')
 	]
 
-	basket_id = models.ForeignKey(Basket, on_delete=models.CASCADE)
+	basket_id = models.OneToOneField(Basket, on_delete=models.CASCADE)
 	payment_method = models.CharField(max_length=50, choices=payment_method_choices)
 	amount_paid = models.PositiveIntegerField()
 	date_added = models.DateTimeField(auto_now_add=True)

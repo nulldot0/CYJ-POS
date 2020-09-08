@@ -2,7 +2,7 @@
 
 {% for invoice in invoices reversed %}
   <div class="card shadow-lg my-2" search="{{invoice.invoice.customer}} {{invoice.invoice.date_created|date:'P'}}">
-  	<div class="card-header position-relative"><a class="stretched-link text-decoration-none" href="/?invoice-id={{invoice.invoice.pk}}">Invoice No. {{invoice.invoice.id}}</a></div>
+  	<div class="card-header position-relative"><a class="stretched-link text-decoration-none" href="{% url 'main-counter' %}?invoice-id={{invoice.invoice.pk}}">Invoice No. {{invoice.invoice.id}}</a></div>
   	<div class="card-body">
   		<p class="m-0"><span class="font-weight-bold">Customer:</span> {{invoice.invoice.customer}}</p>
   		<p class="m-0"><span class="font-weight-bold">Date created:</span> {{invoice.invoice.date_created|date:'m/d/Y'}}</p>

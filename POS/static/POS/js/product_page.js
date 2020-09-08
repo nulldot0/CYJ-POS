@@ -8,6 +8,10 @@ $(document).ready(function() {
 		search($(this).val(), $('#productListContainer'))
 	})
 
+	$('input[name="sub-product-search"]').keyup(function() {
+		search($(this).val(), $('#sub-product-container'))
+	})
+
 	$('#addSubProductBtn').click(function() {
 		$('#newSubProductModal').find('#save').off()
 		$('#newSubProductModal #save').click(function() {

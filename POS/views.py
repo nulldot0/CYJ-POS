@@ -17,7 +17,7 @@ def main(request):
 		})
 	else:
 		invoice = Basket.objects.create(handler=request.user)
-		return redirect(f'/?invoice-id={invoice.id}')
+		return redirect(f'/main-counter/?invoice-id={invoice.id}')
 
 # ------------------------------------------------------
 # Product page 
@@ -265,14 +265,21 @@ def pay_payment(request, method, pk):
 	if request.method == 'POST':
 		amount_paid = request.POST.get('amountPaid')
 		basket = Basket.objects.get(pk=pk)
-		basket_total_price = basket.producttransaction_set.all().aggregate(Sum('total_price'))['total_price__sum']
-		if method == 'cash' and (basket_total_price - int(amount_paid)) == 0:
-			basket.status = 'paid'
-			basket.save()
+		if not InvoiceTransaction.objects.filter(basket_id=basket).exists():
+			basket_total_price = basket.producttransaction_set.all().aggregate(Sum('total_price'))['total_price__sum']
+			if method == 'cash' and (int(amount_paid) - basket_total_price) >= 0:
+				basket.status = 'paid'
+				basket.save()
 
-		InvoiceTransaction.objects.create(basket_id=basket, payment_method=method, amount_paid=amount_paid)
-		return HttpResponse('done')
-		
+			InvoiceTransaction.objects.create(basket_id=basket, payment_method=method, amount_paid=amount_paid)
+			
+			return HttpResponse('done')
+		else:
+			invoice = InvoiceTransaction.objects.get(basket_id=basket)
+			invoice.amount_paid = amount_paid
+			invoice.save()
+			return	HttpResponse('invoice already exists')
+
 def get_invoice_total(request, pk):
 	invoice = Basket.objects.get(pk=pk)
 	total = invoice.producttransaction_set.all().aggregate(

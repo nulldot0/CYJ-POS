@@ -3,7 +3,7 @@
 {% block content %}
 <h4>Welcome {% if request.user.first_name %}{{request.user.first_name}}{% else %}{{request.user.username}}{% endif %}!</h4>
   <div class="d-flex flex-column">
-    <a href="/" class="btn btn-primary align-self-end my-2 text-white">New Order</a>
+    <a href="{% url 'main-counter' %}" class="btn btn-primary align-self-end my-2 text-white">New Order</a>
     <h4 class="mb-2">Transactions</h4>
     <input type="text" name="search-transactions" placeholder="Search Transactions" class="form-control">
     <div class="jumbotron py-3 mt-2" style="height: 60vh; overflow-y: auto" id="invoice-list-div">

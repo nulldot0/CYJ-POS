@@ -1,7 +1,7 @@
 {% load static %}
 
 {% for product in products %}
-<div class="w-50 px-2 my-2" data-toggle="modal" data-target="#subProductsModal" data-prod-id="{{product.id}}" data-prod-name="{{product.name}}" search="{{product.name}}">
+<div class="w-50 px-2 my-2" data-toggle="modal" data-target="#subProductsModal" data-prod-id="{{product.id}}" data-prod-name="{{product.name}}" search="{{product.name}} {{product.category}}">
 	<div class="card shadow-lg rounded-lg" data-prod-id="{{product.id}}" data-prod-name="{{product.name}}">
 	  <img class="card-img-bottom img-fluid rounded-top" src="{% static 'POS/img/default.jpeg'%}" alt="Card image cap" data-prod-id="{{product.id}}" data-prod-name="{{product.name}}">
       <p class="card-text px-1 py-1 text-center font-weight-bold" data-prod-id="{{product.id}}" data-prod-name="{{product.name}}">{{product.name}}</p>

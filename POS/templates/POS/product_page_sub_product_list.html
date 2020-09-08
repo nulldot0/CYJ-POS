@@ -1,5 +1,5 @@
 {% for sub_product in sub_products %}
-<div class="card my-2 shadow" data-description="{{sub_product.description}}" data-unit-price="{{sub_product.unit_price}}" data-unit-cost="{{sub_product.unit_cost}}" data-title="{{sub_product.product_family}}" data-sub-product-id={{sub_product.pk}}>
+<div class="card mb-2 shadow" data-description="{{sub_product.description}}" data-unit-price="{{sub_product.unit_price}}" data-unit-cost="{{sub_product.unit_cost}}" data-title="{{sub_product.product_family}}" data-sub-product-id={{sub_product.pk}}  search="{{sub_product.description}}">
 	<div class="card-header d-flex justify-content-between">
 		<div>
 			<p class="m-0"><span class="font-weight-bold">Description:</span> {{sub_product.description}}</p>

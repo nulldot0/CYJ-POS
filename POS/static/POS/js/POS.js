@@ -109,7 +109,7 @@ let getFavorites = (userID, targetDiv=$('#favorites-div')) => {
 
 // get all customer
 let getCustomers = (targetDiv=$('#selectionCustomerModal .modal-body')) => {
-	$.get('get-customers/').done(function(data) {
+	$.get('/get-customers/').done(function(data) {
 		targetDiv.empty().html(data)
 	})
 }
@@ -132,7 +132,7 @@ let getSubProductById = (prodId) => {
 		let modalBody = $('#subProductsModal .modal-body')
 		modalBody.empty()
 
-		$.get(`get-sub-products-by-id/`, {
+		$.get(`/get-sub-products-by-id/`, {
 			product_id:prodId
 		}).done(function(data) {
 			modalBody.html(data)
@@ -426,7 +426,7 @@ let payEvent = () => {
 	$('input[name="cash"]').keyup(function() {
 		let amount = $(this).val()
 		let payable = Number($('#total span').text().replace('₱', ''))
-		$('#change span').text(`₱${formatNum(payable - amount)}`)
+		$('#change span').text(`₱${formatNum(amount - payable)}`)
 	})
 
 	$('#pay-btn').click(function() {
