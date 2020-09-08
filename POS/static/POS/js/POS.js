@@ -21,6 +21,10 @@ $(document).ready(function() {
 	getCounter()
 	invoiceModalEvent()
 	searchEvent.subProduct()
+
+	$('#menu-app').click(() => {
+		$('#btnGroup').slideToggle()
+	})
 })
 
 
@@ -147,6 +151,7 @@ let getSubProductById = (prodId) => {
 
 // triggers when sub product modal save is clicked
 let subProductSave = () => {
+	$('#subProductsModal #save').off()
 	$($('#subProductsModal #save')).click(function() {
 		var productData = []
 		let invoiceId = $('input[name="invoice-id"]').val()
@@ -165,7 +170,6 @@ let subProductSave = () => {
 				units: units
 			})
 		})
-
 		new Promise((resolve, reject) => {
 			$.post(`/update-sub-product/${invoiceId}`, { 
 					productData: JSON.stringify(productData), 
@@ -173,8 +177,9 @@ let subProductSave = () => {
 					})
 			.done(function(data) {
 				console.log(data)
-				$('#subProductsModal').modal('hide')
 				resolve()
+				$('#subProductsModal').modal('hide')
+
 			})
 		}).then(getTotal)
 
@@ -206,7 +211,7 @@ let getSubProductUnits = () => {
 // adds customer
 let addCustomer = (name) => {
 	return new Promise((resolve, reject) => {
-		$.post('add-customer/', {
+		$.post('/add-customer/', {
 			name:name,
 			csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val()
 		})
@@ -220,7 +225,7 @@ let addCustomer = (name) => {
 
 // changes the customer
 let changeCustomer = (custId) => {
-	$.post('change-customer/', {
+	$.post('/change-customer/', {
 		invoice_id: $('input[name="invoice-id"]').val(),
 		customer_id: custId,
 		csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val()
@@ -259,16 +264,19 @@ let btnGroupEvent = () => {
 
 				if ($(e.target).data('btn-path') == 'counter') {
 						getCounter()
+						$(this).slideToggle()
 				}
 
 				if ($(e.target).data('btn-path') == 'invoice') {
 					// do something
 						getInvoice()
+						$(this).slideToggle()
 				}
 
 				if ($(e.target).data('btn-path') == 'pay') {
 					// do something
 					getPay()
+					$(this).slideToggle()
 				}
 
 				$(e.target).siblings().each(function(index, value) {

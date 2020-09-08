@@ -39,7 +39,7 @@ def product_page_get_categories(request):
 
 def product_page_get_sub_product(request, pk):
 	product = Product.objects.get(pk=pk)
-	sub_products = product.subproduct_set.all()
+	sub_products = product.subproduct_set.all().order_by('unit_price')
 
 	return render(request, 'POS/product_page_sub_product_list.html', {
 			'sub_products': sub_products
