@@ -146,7 +146,7 @@ def counter_get_products(request):
 def get_sub_products_by_id(request):
 	prod_id = request.GET.get('product_id')
 	return render(request, 'POS/counter_sub_product_list.html', {
-			'sub_products': Product.objects.get(id=prod_id).subproduct_set.all().order_by('description')
+			'sub_products': Product.objects.get(id=prod_id).subproduct_set.all().order_by('unit_price')
 		})
 
 def get_sub_products_units(request, pk):
@@ -286,3 +286,10 @@ def get_invoice_total(request, pk):
 		Sum('total_price'))
 	return HttpResponse(dumps(total))
 
+def sub_product_page(request):
+	return render(request, 'POS/sub_product_page.html')
+
+def get_sub_products(request):
+	return render(request, 'POS/sub_product_page_sub_product_list.html', {
+			'sub_products': SubProduct.objects.all().order_by('unit_price')
+		})

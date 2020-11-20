@@ -1,5 +1,6 @@
 $(document).ready(function() {
-	let customerIdInp = $('input[name="customer-id"]').val()
+
+	// Event on button when adding new customer
 	$('#newCustomerModal #add').click(function(e) {
 		if ($('#newCustomerModal input[name="name"]').val()) {
 			addCustomer($('#newCustomerModal input[name="name"]').val())
@@ -9,6 +10,7 @@ $(document).ready(function() {
 		$('#newCustomerModal').modal('hide')
 	})
 
+	// Event when changing customer
 	$('#selectionCustomerModal').click(function(e) {
 		if ($(e.target).hasClass('list-group-item-action')) {
 			$(this).modal('hide')
@@ -17,7 +19,38 @@ $(document).ready(function() {
 		}
 	})
 
-	btnGroupEvent()
+	// Event to change page to counter, pay, invoice
+	$('#btnGroup').click(function(e) {
+		if ($(e.target).data('btn-path')) {
+			if (!($(e.target).hasClass('active'))) {
+				let invId = $('input[name="invoice-id"]').val()
+
+				if ($(e.target).data('btn-path') == 'counter') {
+						getCounter()
+						$(this).slideToggle()
+				}
+
+				if ($(e.target).data('btn-path') == 'invoice') {
+					// do something
+						getInvoice()
+						$(this).slideToggle()
+				}
+
+				if ($(e.target).data('btn-path') == 'pay') {
+					// do something
+					getPay()
+					$(this).slideToggle()
+				}
+
+				$(e.target).siblings().each(function(index, value) {
+					$(value).removeClass('active')
+				})
+
+				$(e.target).addClass('active')
+			}
+		}
+	})
+
 	getCounter()
 	invoiceModalEvent()
 	searchEvent.subProduct()
@@ -91,10 +124,31 @@ let getInvoice = () => {
 	.then(getTotal)
 	.then(searchEvent.invoiceProduct)
 }
+
+let getPay = () => {
+	let invId = $('input[name="invoice-id"]').val()
+	new Promise((resolve, reject) => {
+		$.get(`/pay/${invId}`, function(data) {
+			$('.container').empty().html(data)
+			resolve()
+		})
+		.then(getTotal)
+		.then(payEvent)
+		.then(() => {
+			$.get(`/get-total/${$('input[name="invoice-id"]').val()}`)
+			.done(function(data) {
+				if (JSON.parse(data).total_price__sum) {
+					$('input[name="cash"]').val(JSON.parse(data).total_price__sum)
+				} 
+			})
+		})
+	})
+}
 // ----------------------------------------------------------
 
 
 // SIMPLE EVENTS
+
 // gets all products
 let getProducts = (targetDiv=$('#products-div'), category='all') => {
 	loader = loader.clone().removeClass('d-none')
@@ -149,7 +203,7 @@ let getSubProductById = (prodId) => {
 	.then(subProductAddMinus)
 }
 
-// triggers when sub product modal save is clicked
+// triggers when sub product modal save button is clicked
 let subProductSave = () => {
 	$('#subProductsModal #save').off()
 	$($('#subProductsModal #save')).click(function() {
@@ -232,60 +286,6 @@ let changeCustomer = (custId) => {
 	})
 	.done(function(data) {
 		console.log(data)
-	})
-}
-
-let getPay = () => {
-	let invId = $('input[name="invoice-id"]').val()
-	new Promise((resolve, reject) => {
-		$.get(`/pay/${invId}`, function(data) {
-			$('.container').empty().html(data)
-			resolve()
-		})
-		.then(getTotal)
-		.then(payEvent)
-		.then(() => {
-			$.get(`/get-total/${$('input[name="invoice-id"]').val()}`)
-			.done(function(data) {
-				if (JSON.parse(data).total_price__sum) {
-					$('input[name="cash"]').val(JSON.parse(data).total_price__sum)
-				} 
-			})
-		})
-	})
-
-}
-
-let btnGroupEvent = () => {
-	$('#btnGroup').click(function(e) {
-		if ($(e.target).data('btn-path')) {
-			if (!($(e.target).hasClass('active'))) {
-				let invId = $('input[name="invoice-id"]').val()
-
-				if ($(e.target).data('btn-path') == 'counter') {
-						getCounter()
-						$(this).slideToggle()
-				}
-
-				if ($(e.target).data('btn-path') == 'invoice') {
-					// do something
-						getInvoice()
-						$(this).slideToggle()
-				}
-
-				if ($(e.target).data('btn-path') == 'pay') {
-					// do something
-					getPay()
-					$(this).slideToggle()
-				}
-
-				$(e.target).siblings().each(function(index, value) {
-					$(value).removeClass('active')
-				})
-
-				$(e.target).addClass('active')
-			}
-		}
 	})
 }
 
@@ -431,12 +431,14 @@ let getTotal = () => {
 }
 
 let payEvent = () => {
+	// shows change when cash input changed
 	$('input[name="cash"]').keyup(function() {
 		let amount = $(this).val()
 		let payable = Number($('#total span').text().replace('₱', ''))
 		$('#change span').text(`₱${formatNum(amount - payable)}`)
 	})
 
+	// submit data
 	$('#pay-btn').click(function() {
 		let invId = $('input[name="invoice-id"]').val()
 		$.post(`/pay/payment/cash/${invId}`, {

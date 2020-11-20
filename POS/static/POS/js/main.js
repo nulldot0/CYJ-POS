@@ -1,5 +1,4 @@
 $(document).ready(function() {
-
 	$('#menu-btn').click(function() {
 		var btn = $(this)
 		if ($($(this).parent()).css('margin-left') == '0px') {
@@ -32,7 +31,7 @@ let formatNum = (num) => {
 			ret_num.push(num[i])
 		}
 
-		return (`-${ret_num.reverse().join('')}`)
+		return `-${ret_num.reverse().join('')}`
 	} else {
 		num = String(num).split('').reverse()
 		let ret_num = []

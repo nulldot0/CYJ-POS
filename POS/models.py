@@ -22,7 +22,7 @@ class Category(models.Model):
 		ordering = ['name']
 
 class Product(models.Model):
-	name = models.CharField(max_length=30, unique=True)
+	name = models.CharField(max_length=30)
 	category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True)
 
 	def __str__(self):

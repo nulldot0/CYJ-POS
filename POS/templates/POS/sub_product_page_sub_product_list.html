@@ -1,0 +1,12 @@
+{% for sub_product in sub_products %}
+<div class="card mb-2 shadow" search="{{sub_product.product_family.name}} {{sub_product.description}} {{sub_product.product_family.category}}">
+	<div class="card-header">
+		<p class="m-0" style="font-size: 1.5em">₱{{sub_product.unit_price}}</p>
+		<p class="m-0">{{sub_product.product_family.name}} {{sub_product.description}}</p>
+	</div>
+</div>
+{% empty %}
+<div class="d-flex h-100 justify-content-center align-items-center">
+	<h4>No sub product found.</h4>
+</div>
+{% endfor %}
